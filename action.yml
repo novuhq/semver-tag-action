@@ -1,0 +1,36 @@
+name: "Semantic Custom Version Bumping"
+description: "Bump version"
+author: "Aliaksandr Ryzhou"
+outputs:
+  sha:
+    description: "The current sha of the code"
+    value: ${{ steps.run_script.outputs.sha }}
+  sha_short:
+    description: "The current sha short of the code"
+    value: ${{ steps.run_script.outputs.sha_short }}
+  new_version:
+    description: "The new version of the application"
+    value: ${{ steps.run_script.outputs.new_version }}
+  previous_version:
+    description: "The previous version of the application"
+    value: ${{ steps.run_script.outputs.previous_version }}
+inputs:
+  current_version:
+    description: "Required for permission to tag the repo."
+    required: true
+  list_labels_file_patch:
+    description: "List os labels from the PR to define what we have to do with version"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - id: run_script
+      run: |
+        cp ${{ github.action_path }}/scripts/semver /usr/local/bin/semver 
+        chmod +x /usr/local/bin/semver
+        chmod +x ${{ github.action_path }}/scripts/determine_bump.sh
+        ${{ github.action_path }}/scripts/determine_bump.sh ${{ inputs.current_version }} ${{ inputs.list_labels_file_patch }}
+      shell: bash
+branding:
+  icon: "git-merge"
+  color: "green"
