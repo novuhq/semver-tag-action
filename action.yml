@@ -1,4 +1,4 @@
-name: "Semantic Custom Version Bumping"
+name: "Semantic Custom Version Bumping depending on PR labels"
 description: "Bump version"
 author: "Aliaksandr Ryzhou"
 outputs:
@@ -19,7 +19,7 @@ inputs:
     description: "Required for permission to tag the repo."
     required: true
   list_labels_file_patch:
-    description: "List os labels from the PR to define what we have to do with version"
+    description: "List of labels from the PR to define what we have to do with version"
     required: true
 runs:
   using: "composite"
