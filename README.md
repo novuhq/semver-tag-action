@@ -70,3 +70,56 @@ jobs:
           list_labels_file_patch: /tmp/label_list
 
 ```
+## Behavior of Tagging Process
+
+We have to discuss this point but at the moment it works as follows:
+
+The versioning process usually tries to pick up and to bump the latest git tag. It means if we have no attached labels to the Pull Request then a workflow process will get the latest git tag and will increase a build number.
+
+```bash
+when no attached labels:
+v1.0.0-alpha0 --> v1.0.0-alpha1
+v1.0.0-beta12 --> v1.0.0-beta13
+v1.0.0-demo4 --> v1.0.0-demo5
+```
+
+If the latest tag doesn't have any build numbers then a workflow process will get the latest git tag and will create pre-release type alpha with build number 0.
+
+```bash
+when no attached labels:
+v1.0.0 --> v1.0.1-alpha
+v1.0.1-alpha --> v1.0.1-alpha1
+v1.2.3 --> v1.2.4-alpha
+```
+
+If we want to start a new version with another prerelease type we will have to use labels attached to the PR. For example, the different labels will call the following changes:
+
+```bash
+label pre:beta
+v0.22.1 --> v0.22.2-beta
+v0.22.1-beta0 --> v0.22.1-beta1 (the same behavior when no labels)
+
+label pre:demo
+v0.22.1 --> v0.22.2-demo
+v0.22.1-demo --> v0.22.1-demo1 (the same behavior when no labels)
+```
+
+If we want to move from some pre-release version to the version without pre-release suffix we have to use label `bump:release`
+
+```bash
+label bump:release
+v0.22.1-beta0 --> v0.22.1
+v0.22.1-demo2 --> v0.22.1
+v0.22.1-demo --> v0.22.1-demo1 (the same behavior when no labels)
+
+label [bump:release, bump:patch]
+v0.22.1-demo2 --> v0.22.2 (because bump:patch|minor|major tags have higher priority)
+```
+
+To avoid future problems if someone adds a few labels to the PR the following priority has been implemented:
+
+```bash
+**pre:alpha < pre:beta < pre:demo < bump:release < bump:patch < bump:minor < bump:major**
+```
+
+More examples you can generate if you run ```./determine_bump.sh v.1.1.0 path_to_file_with_labels```
